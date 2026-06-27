@@ -75,6 +75,7 @@ function enrichLead(company, email) {
   }
   out.domain = domain;
 
+  var title = '';
   if (domain) {
     try {
       var page = UrlFetchApp.fetch('https://' + domain, {
@@ -83,10 +84,15 @@ function enrichLead(company, email) {
       if (page.getResponseCode() < 400) {
         var html = page.getContentText();
         out.description = extractMeta(html);
-        out.industry = inferIndustry((out.description + ' ' + extractTitle(html)).toLowerCase());
+        title = extractTitle(html);
       }
     } catch (err) { Logger.log('scrape failed: ' + err); }
   }
+
+  // Infer industry from EVERYTHING we know (company name + domain + scraped text),
+  // so it still works when a site blocks scraping or renders only via JavaScript.
+  var signal = (company + ' ' + domain + ' ' + out.description + ' ' + title).toLowerCase();
+  out.industry = inferIndustry(signal);
 
   if (!out.industry) out.industry = 'Unknown';
   return out;
@@ -99,6 +105,7 @@ function inferIndustry(text) {
     ['Healthcare',            ['health', 'medical', 'clinic', 'patient', 'pharma', 'hospital']],
     ['Education',             ['education', 'learning', 'course', 'student', 'school', 'university', 'edtech']],
     ['Real Estate',           ['real estate', 'property', 'realty', 'mortgage']],
+    ['Automotive',            ['automotive', 'dealership', 'dealer', 'vehicle', 'automobile', 'motors', 'voiture', 'edenauto', 'auto']],
     ['Manufacturing',         ['manufactur', 'factory', 'industrial', 'machinery', 'supply chain']],
     ['Marketing / Agency',    ['marketing', 'agency', 'brand', 'advertis', 'seo', 'campaign']],
     ['Media / Content',       ['media', 'news', 'publish', 'streaming']],

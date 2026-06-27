@@ -71,6 +71,7 @@ const cases = [
   { label: 'Company match (Stripe)', namedValues: { Name: ['Rishav Jamwal'], Email: ['contact@stripe.com'], Company: ['Stripe'] } },
   { label: 'No company, work email (Shopify)', namedValues: { Name: ['A Lead'], Email: ['hello@shopify.com'], Company: [''] } },
   { label: 'Generic Gmail only', namedValues: { Name: ['Casual Visitor'], Email: ['someone@gmail.com'], Company: [''] } },
+  { label: 'Scrape-blocked site (edena)', namedValues: { Name: ['shashank'], Email: ['shashank.jamwal24@gmail.com'], Company: ['edena'] } },
 ];
 
 const driver = `
@@ -114,6 +115,7 @@ assert(CAP.rows[1][5] === 'Finance / Fintech', 'Stripe inferred as Finance / Fin
 assert(CAP.rows[2][4] === 'shopify.com', 'Shopify resolved from work email domain');
 assert(CAP.rows[2][5] === 'E-commerce / Retail', 'Shopify inferred as E-commerce / Retail');
 assert(CAP.rows[3][4] === '', 'Gmail-only lead left without a company domain (correct)');
+assert(CAP.rows[4][5] === 'Automotive', 'edena/edenauto inferred as Automotive even though the site blocks scraping');
 assert(!!CAP.email, 'an email notification was produced');
 console.log('\n' + (ok ? '✅ ALL CHECKS PASSED' : '❌ SOME CHECKS FAILED'));
 process.exit(ok ? 0 : 1);
