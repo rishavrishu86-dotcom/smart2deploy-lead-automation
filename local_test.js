@@ -58,6 +58,10 @@ global.SpreadsheetApp = {
 };
 
 global.MailApp = { sendEmail: (o) => { CAP.email = o; } };
+global.PropertiesService = {
+  getScriptProperties: () => ({ getProperty: () => null, setProperty: () => {} }),
+};
+global.Session = { getEffectiveUser: () => ({ getEmail: () => 'owner@example.com' }) };
 global.ScriptApp = {
   getProjectTriggers: () => [],
   newTrigger: () => ({ forSpreadsheet: () => ({ onFormSubmit: () => ({ create: () => {} }) }) }),

@@ -9,7 +9,11 @@
 // ============================ CONFIG ============================
 var CONFIG = {
   OUTPUT_SHEET: 'Enriched Leads',                 // tab name (auto-created)
-  NOTIFY_EMAIL: 'Rishav.rishu86@gmail.com',       // '' to skip email
+  // Recipient is resolved at runtime by getNotifyEmail() so no address sits in
+  // this public file. To send to a specific address, set a Script Property named
+  // NOTIFY_EMAIL (Project Settings > Script Properties) - that stays private.
+  // If unset, notifications go to the Google account running the script.
+  NOTIFY_EMAIL: '',                               // optional; '' = resolve at runtime
   SLACK_WEBHOOK_URL: ''                           // optional Slack webhook; '' to skip
 };
 
@@ -183,11 +187,22 @@ function notifySlack(summary) {
   } catch (err) { Logger.log('Slack notify failed: ' + err); }
 }
 
+function getNotifyEmail() {
+  // 1) private Script Property, else 2) CONFIG override, else 3) the running account.
+  try {
+    var p = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL');
+    if (p) return p;
+  } catch (e) {}
+  if (CONFIG.NOTIFY_EMAIL) return CONFIG.NOTIFY_EMAIL;
+  try { return Session.getEffectiveUser().getEmail(); } catch (e) { return ''; }
+}
+
 function notifyEmail(summary) {
-  if (!CONFIG.NOTIFY_EMAIL) return;
+  var to = getNotifyEmail();
+  if (!to) return;
   try {
     MailApp.sendEmail({
-      to: CONFIG.NOTIFY_EMAIL,
+      to: to,
       subject: summary.title,
       body: summary.lines.join('\n')
     });
