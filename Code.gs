@@ -9,7 +9,7 @@
 // ============================ CONFIG ============================
 var CONFIG = {
   OUTPUT_SHEET: 'Enriched Leads',                 // tab name (auto-created)
-  NOTIFY_EMAIL: 'shashank.jamwal24@gmail.com',    // '' to skip email
+  NOTIFY_EMAIL: 'Rishav.rishu86@gmail.com',       // '' to skip email
   SLACK_WEBHOOK_URL: ''                           // optional Slack webhook; '' to skip
 };
 
