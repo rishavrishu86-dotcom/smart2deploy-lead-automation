@@ -152,7 +152,10 @@ function extractTitle(html) {
 
 // ========================= SHEET LOG =========================
 function logToSheet(lead, enriched) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Works whether the script is bound to the Sheet OR standalone (bootstrap()
+  // saves the spreadsheet id to Script Properties).
+  const ss = SpreadsheetApp.getActiveSpreadsheet() ||
+             SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SS_ID'));
   let sh = ss.getSheetByName(CONFIG.OUTPUT_SHEET);
   if (!sh) {
     sh = ss.insertSheet(CONFIG.OUTPUT_SHEET);
@@ -221,7 +224,46 @@ function getField(namedValues, keys) {
   return '';
 }
 
-/** Run ONCE to install the form-submit trigger programmatically. */
+/**
+ * ⭐ ONE-CLICK SETUP — run this single function once in a NEW standalone
+ * Apps Script project (script.google.com → New project → paste this file → Run `bootstrap`).
+ *
+ * It will automatically:
+ *   1. Create a Google Form with Name / Email / Company questions
+ *   2. Create a Google Sheet and link the Form responses to it
+ *   3. Install the on-form-submit trigger
+ *   4. Run one test lead through the pipeline
+ * Then it logs the Form link + Sheet link for you.
+ */
+function bootstrap() {
+  // 1) Form
+  const form = FormApp.create('Smart2Deploy — Lead Capture');
+  form.setDescription('Lead capture form (auto-enriched on submit).');
+  form.addTextItem().setTitle('Name').setRequired(true);
+  form.addTextItem().setTitle('Email').setRequired(true);
+  form.addTextItem().setTitle('Company').setRequired(false);
+
+  // 2) Sheet + link
+  const ss = SpreadsheetApp.create('Smart2Deploy — Leads');
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
+  PropertiesService.getScriptProperties().setProperty('SS_ID', ss.getId());
+
+  // 3) Trigger on the linked spreadsheet
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'onFormSubmit')
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('onFormSubmit').forSpreadsheet(ss).onFormSubmit().create();
+
+  // 4) Smoke-test the pipeline
+  testRun();
+
+  Logger.log('✅ DONE');
+  Logger.log('📝 Fill out the form here:  ' + form.getPublishedUrl());
+  Logger.log('🛠  Edit the form here:      ' + form.getEditUrl());
+  Logger.log('📊 Enriched leads sheet:    ' + ss.getUrl());
+}
+
+/** Run ONCE to install the form-submit trigger programmatically (Sheet-bound projects). */
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   // remove old copies so we don't double-fire

@@ -24,18 +24,30 @@ Google Form  ──submit──▶  Apps Script trigger
 
 ---
 
-## Setup (about 5 minutes)
+## Setup — one click (recommended, ~2 minutes)
 
-1. **Create a Google Form** with at least these questions: **Name**, **Email**, **Company**.
-2. In the Form: **Responses → Link to Sheets** → create a new spreadsheet.
-3. Open that **Sheet → Extensions → Apps Script**.
-4. Delete the placeholder code, paste in **`Code.gs`**, and **Save**.
-5. Edit the `CONFIG` block at the top:
-   - `NOTIFY_EMAIL` — your email (already set).
-   - `SLACK_WEBHOOK_URL` — optional; create one at <https://api.slack.com/messaging/webhooks>. Leave `''` to use email only.
-6. Run the **`setup`** function once (top toolbar → select `setup` → Run). Approve the permission prompt — this installs the on-form-submit trigger.
-7. **Test without the form:** run **`testRun`** — it pushes a sample "Stripe" lead through the whole pipeline so you can confirm the Sheet row + notification appear.
-8. Submit the real Form once to see it fire end to end.
+The `bootstrap()` function builds **everything** for you (Form + Sheet + trigger + a test run). No manual Form building.
+
+1. Go to <https://script.google.com> → **New project**.
+2. Delete the placeholder code, paste in all of **`Code.gs`**, and **Save** (💾).
+3. (Optional) edit the `CONFIG` block — `NOTIFY_EMAIL` is already set; add a `SLACK_WEBHOOK_URL` if you want Slack.
+4. In the function dropdown (top toolbar) pick **`bootstrap`** → **Run**.
+5. Approve the Google permission prompt (it needs Forms, Sheets, Mail, Triggers).
+6. Open **View → Logs** (or **Execution log**). It prints three links:
+   - 📝 the **Form** to fill out
+   - 📊 the **Sheet** where enriched leads land
+   - 🛠 the Form **editor**
+
+That's it — it already ran one test lead, so check the Sheet's `Enriched Leads` tab and your inbox to confirm. Then submit the real Form once for the demo.
+
+> Heads-up: when you run `bootstrap`, Google shows an "unverified app" screen (normal for personal scripts). Click **Advanced → Go to project (unsafe)** to approve your own code.
+
+## Setup — manual (if you prefer building the Form yourself)
+
+1. Create a Google Form with **Name**, **Email**, **Company** questions.
+2. Form → **Responses → Link to Sheets** → new spreadsheet.
+3. That **Sheet → Extensions → Apps Script**, paste `Code.gs`, save.
+4. Run **`setup`** (installs the trigger), then **`testRun`** (smoke test).
 
 > If your Form uses different question wording, add it to `FIELD_MAP` at the top of `Code.gs`.
 
